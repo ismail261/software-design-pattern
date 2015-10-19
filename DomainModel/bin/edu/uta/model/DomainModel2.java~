@@ -1,0 +1,288 @@
+package edu.uta.model;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
+public class DomainModel2 extends ModelConcept {
+
+	private static DomainModel2 instance;
+
+	ArrayList<ClassObj> classModelconceptList = new ArrayList<ClassObj>();
+	ArrayList<Attribute> attributeModelconceptList = new ArrayList<Attribute>();
+	ArrayList<Inheritance> inheritanceModelconceptList = new ArrayList<Inheritance>();
+	ArrayList<Association> associationModelconceptList = new ArrayList<Association>();
+	ArrayList<Aggregation> aggregationModelconceptList = new ArrayList<Aggregation>();
+	public static DomainModel2 getInstance() {
+		if (instance == null)
+			instance = new DomainModel2();
+		return instance;
+	}
+        public void clearAll() {
+           this.classModelconceptList.clear();
+           this.attributeModelconceptList.clear();
+           this.inheritanceModelconceptList.clear();
+           this.associationModelconceptList.clear();
+           this.aggregationModelconceptList.clear();
+           if (classModelconceptList.size()>0)
+              System.out.println("classModelconceptList.size()>0");
+           if (inheritanceModelconceptList.size()>0)
+              System.out.println("inheritanceModelconceptList.size()>0");
+           if (associationModelconceptList.size()>0)
+              System.out.println("associationModelconceptList.size()>0");
+           if (aggregationModelconceptList.size()>0)
+              System.out.println("aggregationModelconceptList.size()>0");
+        }
+	public void addClass(ClassObj classObj) {
+		classModelconceptList.add(classObj);
+	}
+        public boolean equals(ModelConcept mc) {
+           return false;
+        }
+	public void addAttribute(Attribute attribute) {
+		attributeModelconceptList.add(attribute);
+	}
+
+	public void addInheritance(Inheritance inheritance) {
+		inheritanceModelconceptList.add(inheritance);
+	}
+
+	public void addAssociation(Association association) {
+		associationModelconceptList.add(association);
+	}
+
+	public void addAggregation(Aggregation aggregation) {
+		aggregationModelconceptList.add(aggregation);
+	}
+
+	public boolean removeClass(ClassObj classObj) {
+		boolean isRemoved = false;
+		try {
+			classModelconceptList.remove(classObj);
+			isRemoved = true;
+			removeClassInRelationship(classObj.getName());
+		} catch (Exception e) {
+			isRemoved = false;
+		}
+		return isRemoved;
+	}
+
+	/**
+	 *
+	 * @param classObj
+	 */
+	private void removeClassInRelationship(String className) {
+		Iterator<Aggregation> aggregationIterator = aggregationModelconceptList.iterator();
+		while (aggregationIterator.hasNext()) {
+			Aggregation aggregation = aggregationIterator.next();
+			if (aggregation.getSrcClass().getName().matches(className)
+					|| aggregation.getDstClass().getName().matches(className)) {
+				aggregationIterator.remove();
+			}
+		}
+		Iterator<Association> associationIterator = associationModelconceptList.iterator();
+		while (associationIterator.hasNext()) {
+			Association association = associationIterator.next();
+			if (association.getSrcClass().getName().matches(className)
+					|| association.getDstClass().getName().matches(className)) {
+				associationIterator.remove();
+			}
+		}
+		Iterator<Inheritance> inheritanceIterator = inheritanceModelconceptList.iterator();
+		while (inheritanceIterator.hasNext()) {
+			Inheritance inheritance = inheritanceIterator.next();
+			if(inheritance.getSrcClass().getName().matches(className)
+					|| inheritance.getDstClass().getName().matches(className)){
+				inheritanceIterator.remove();
+			}
+		}
+	}
+
+	public boolean removeAttribute(Attribute attribute) {
+		boolean isRemoved = false;
+		try {
+			attributeModelconceptList.remove(attribute);
+			removeAttributeFromClass(attribute);
+			isRemoved = true;
+		} catch (Exception e) {
+			isRemoved = false;
+		}
+		return isRemoved;
+	}
+
+	/**
+	 * Method to remove the attributes from the class when an attribute is
+	 * deleted.
+	 *
+	 * @param attribute
+	 */
+	private void removeAttributeFromClass(Attribute attribute) {
+		for (ClassObj classObj : classModelconceptList) {
+			if (classObj.getAttributes().contains(attribute)) {
+				classObj.getAttributes().remove(attribute);
+			}
+		}
+	}
+
+	public void removeInheritance(Inheritance inheritance) {
+		inheritanceModelconceptList.remove(inheritance);
+	}
+
+	public void removeAssociation(Association association) {
+		associationModelconceptList.remove(association);
+	}
+
+	public void removeAggregation(Aggregation aggregation) {
+		aggregationModelconceptList.remove(aggregation);
+	}
+
+	public ArrayList<ClassObj> getClassModelconceptList() {
+		return classModelconceptList;
+	}
+
+	public void setClassModelconceptList(
+			ArrayList<ClassObj> classModelconceptList) {
+		this.classModelconceptList = classModelconceptList;
+	}
+
+	public ArrayList<Attribute> getAttributeModelconceptList() {
+		return attributeModelconceptList;
+	}
+
+	public void setAttributeModelconceptList(
+			ArrayList<Attribute> attributeModelconceptList) {
+		this.attributeModelconceptList = attributeModelconceptList;
+	}
+
+	public ArrayList<Inheritance> getInheritanceModelconceptList() {
+		return inheritanceModelconceptList;
+	}
+
+	public void setInheritanceModelconceptList(
+			ArrayList<Inheritance> inheritanceModelconceptList) {
+		this.inheritanceModelconceptList = inheritanceModelconceptList;
+	}
+
+	public ArrayList<Association> getAssociationModelconceptList() {
+		return associationModelconceptList;
+	}
+
+	public void setAssociationModelconceptList(
+			ArrayList<Association> associationModelconceptList) {
+		this.associationModelconceptList = associationModelconceptList;
+	}
+
+	public ArrayList<Aggregation> getAggregationModelconceptList() {
+		return aggregationModelconceptList;
+	}
+
+	public void setAggregationModelconceptList(
+			ArrayList<Aggregation> aggregationModelconceptList) {
+		this.aggregationModelconceptList = aggregationModelconceptList;
+	}
+
+        public ClassObj getAppropriateClass(String className) {
+		for (ClassObj obj : classModelconceptList) {
+			if (obj.getName().toLowerCase().trim()
+                            .compareTo(className.toLowerCase().trim())==0) {
+				return obj;
+			}
+		}
+		return null;
+	}
+
+	public Association getAssociation(String association, String SrcClass,
+			String destClass) {
+
+		for (Association obj : associationModelconceptList) {
+			if ((obj.getName().equals(association))
+					&& (obj.getSrcClass().getName().equals(SrcClass))
+					&& (obj.getDstClass().getName().equals(destClass))) {
+				return obj;
+			}
+		}
+		return null;
+	}
+
+	public Aggregation getAggregation(String aggregation, String SrcClass,
+			String destClass) {
+
+		for (Aggregation obj : aggregationModelconceptList) {
+			if ((obj.getName().equals(aggregation))
+					&& (obj.getSrcClass().getName().equals(SrcClass))
+					&& (obj.getDstClass().getName().equals(destClass))) {
+				return obj;
+			}
+		}
+		return null;
+	}
+
+	// // @Override
+	// void accept(ModelConceptVisitor visitor) {
+	// TODO Auto-generated method stub
+
+	/**
+	 * method to update the classname during edit
+	 */
+	public boolean updateClassName(ClassObj classObj, String className) {
+		boolean updated = false;
+		try {
+			for (ClassObj obj : classModelconceptList) {
+				if (obj.getName().equals(classObj.getName())) {
+					obj.setName(className);
+					updated = true;
+				}
+			}
+		} catch (Exception e) {
+			updated = false;
+		}
+		return updated;
+
+	}
+
+	/**
+	 * method to update attribute name
+	 *
+	 * @param attribute
+	 * @param newName
+	 * @return
+	 */
+	public boolean updateAttributeName(Attribute attribute, String newName) {
+		boolean updated = false;
+		try {
+			for (Attribute attr : attributeModelconceptList) {
+				if (attr.getName().equals(attribute.getName())) {
+					attr.setName(newName);
+					updateAttributeInClass(attribute, newName);
+					updated = true;
+				}
+			}
+		} catch (Exception e) {
+			updated = false;
+		}
+		return updated;
+
+	}
+
+	/**
+	 * method to check if the updated attribute is present in class and update
+	 *
+	 * @param attribute
+	 * @param newName
+	 */
+	private void updateAttributeInClass(Attribute attribute, String newName) {
+		for (ClassObj classObj : classModelconceptList) {
+			if (classObj.getAttributes().contains(attribute)) {
+				for (Attribute attr : classObj.getAttributes()) {
+					if (attr.getName().equals(attribute.getName())) {
+						attr.setName(newName);
+					}
+				}
+			}
+		}
+
+	}
+
+	// }
+
+}

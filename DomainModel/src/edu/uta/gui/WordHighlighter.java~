@@ -1,0 +1,52 @@
+package edu.uta.gui;
+
+import java.awt.Color;
+import edu.uta.model.Aggregation;
+import edu.uta.model.Association;
+import edu.uta.model.ClassObj;
+import edu.uta.model.Inheritance;
+
+public class WordHighlighter implements HighlightAdapter {
+	public void highlightWord (Gui gui) {
+		/*highlightAttribute(gui);
+		highlightAssociation(gui);
+		highlightAggregation(gui);
+		highlightInheritance(gui);*/
+	}
+
+	private void highlightAttribute (Gui gui) {
+		for(int i=0; i<dmController.getClassList().size();i++) {
+			ClassObj obj = dmController.getClassList().get(i);
+			gui.highlightClass(obj.getName());
+			for(int j=0;j<dmController.getAttributesOfClass(obj.getName()).size();j++) {
+				gui.highlightAllInstances(dmController.getAttributesOfClass(obj.getName()).get(j).getName(), Color.ORANGE);
+			}
+		}
+	}
+
+	private void highlightAssociation(Gui gui) {
+		for(int i=0; i<dmController.getAssociationList().size();i++) {
+			ClassObj obj = dmController.getClassList().get(i);
+			gui.highlightClass(obj.getName());
+			Association ass = dmController.getAssociationList().get(i);
+			gui.highlightAllInstances(ass.getName(), Color.GREEN);
+		}
+	}
+
+	private void highlightAggregation(Gui gui) {
+		for(int i=0; i<dmController.getAggregationList().size();i++) {
+			Aggregation aggr = dmController.getAggregationList().get(i);
+			gui.highlightAllInstances(aggr.getName(), Color.CYAN);
+			gui.highlightAllInstances(aggr.getSrcClass().getName(), Color.CYAN);
+			gui.highlightAllInstances(aggr.getDstClass().getName(), Color.CYAN);
+		}
+	}
+
+	private void highlightInheritance(Gui gui) {
+		for(int i=0; i<dmController.getInheritanceList().size();i++) {
+			Inheritance inh = dmController.getInheritanceList().get(i);
+			gui.highlightAllInstances(inh.getSrcClass().getName(), Color.BLUE);
+			gui.highlightAllInstances(inh.getDstClass().getName(), Color.BLUE);
+		}
+	}
+}
